@@ -80,7 +80,7 @@ function PDF_set_info_keywords(PDF $pdf, string $keywords)
  */
 function PDF_set_font(PDF $pdf, string $font, int $size, string $encoding)
 {
-    return $pdf_set_font($font, $size, $encoding);
+    return $pdf->set_font($font, $size, $encoding);
 }
 
 /**
@@ -110,7 +110,7 @@ function PDF_show_xy(PDF $pdf, string $text, float $x, float $y)
  */
 function PDF_setgray_fill(PDF $pdf, float $gray)
 {
-    return $pdf_setgray_fill($gray);
+    return $pdf->setgray_fill($gray);
 }
 
 /**
@@ -295,3 +295,15 @@ function PDF_close(PDF $pdf)
     return $pdf->close();
 }
 
+/**
+ * Add bookmark for current page
+ * 
+ * @param PDF    $pdf  PDF resource
+ * @param string $text Bookmark title
+ * 
+ * @return bool Returns TRUE on success or FALSE on failure.
+ */
+function PDF_add_outline(PDF $pdf, string $text)
+{
+    return $pdf->add_outline($text);
+}

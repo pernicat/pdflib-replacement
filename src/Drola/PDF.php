@@ -8,6 +8,8 @@ class PDF
     private $_encoding;
     private $_font;
     private $_page;
+    private $_last_geometry;
+    private $_current_point;
 
     /**
      * Create PDF file
@@ -18,7 +20,7 @@ class PDF
      */
     public static function open_file(string $filename)
     {
-
+        return new PDF($filename);
     }
 
     public function ___construct($filename)
@@ -95,12 +97,15 @@ class PDF
         $fonts = array(
             'courier' => Zend_Pdf_Font::FONT_COURIER,
             'courier-bold' => Zend_Pdf_Font::FONT_COURIER_BOLD,
+            'courier-oblique' => Zend_Pdf_Font::FONT_COURIER_ITALIC,
             'courier-italic' => Zend_Pdf_Font::FONT_COURIER_ITALIC,
             'courier-bold-italic' => Zend_Pdf_Font::FONT_COURIER_BOLD_ITALIC,
+            'courier-boldoblique' => Zend_Pdf_Font::FONT_COURIER_BOLD_ITALIC,
             'times' => Zend_Pdf_Font::FONT_TIMES,
             'times-bold' => Zend_Pdf_Font::FONT_TIMES_BOLD,
             'times-italic' => Zend_Pdf_Font::FONT_TIMES_ITALIC,
             'times-bold-italic' => Zend_Pdf_Font::FONT_TIMES_BOLD_ITALIC,
+            'times-bolditalic' => Zend_Pdf_Font::FONT_TIMES_BOLD_ITALIC,
             'times-roman' => Zend_Pdf_Font::FONT_TIMES,
             'times-roman-bold' => Zend_Pdf_Font::FONT_TIMES_BOLD,
             'times-roman-italic' => Zend_Pdf_Font::FONT_TIMES_ITALIC,
@@ -108,7 +113,9 @@ class PDF
             'helvetica' => Zend_Pdf_Font::FONT_HELVETICA,
             'helvetica-bold' => Zend_Pdf_Font::FONT_HELVETICA_BOLD,
             'helvetica-italic' => Zend_Pdf_Font::FONT_HELVETICA_ITALIC,
+            'helvetica-oblique' => Zend_Pdf_Font::FONT_HELVETICA_ITALIC,
             'helvetica-bold-italic' => Zend_Pdf_Font::FONT_HELVETICA_BOLD_ITALIC,
+            'helvetica-boldoblique' => Zend_Pdf_Font::FONT_HELVETICA_BOLD_ITALIC,
             'symbol' => Zend_Pdf_Font::FONT_SYMBOL,
             'zapfdingbats' => Zend_Pdf_Font::FONT_ZAPFDINGBATS
         );
@@ -167,7 +174,17 @@ class PDF
      */
     public function setgray_fill(float $gray)
     {
+        if (!$this->_page) {
+            return false;
+        }
 
+        try {
+            $this->_page->setFillColor(new Zend_Pdf_Color_GrayScale($gray));
+            return true;
+        } catch(Exception $e) {
+        }
+
+        return false;
     }
 
     /**
@@ -180,7 +197,28 @@ class PDF
      */
     public function stringwidth(string $text)
     {
+        //Source: http://stackoverflow.com/a/8076461
+        if ($this->_page instanceof Zend_Pdf_Page ) {
+            $font = $this->_page->getFont();
+            $fontSize = $this->_page->getFontSize();
+        } elseif ($this->_page instanceof Zend_Pdf_Resource_Font ) {
+            $font = $this->_page;
+            if( $fontSize === null ) return false;
+        }
 
+        if (!$font instanceof Zend_Pdf_Resource_Font ) {
+            return false;
+        }
+        $drawingText = $text;//iconv ( '', $encoding, $text );
+        $characters = array ();
+        for ($i = 0; $i < strlen($drawingText); $i++) {
+            $characters[] = ord($drawingText[$i]);
+        }
+        $glyphs = $font->glyphNumbersForCharacters($characters);
+        $widths = $font->widthsForGlyphs($glyphs);
+        $textWidth = (array_sum($widths) / $font->getUnitsPerEm()) * $fontSize;
+
+        return $textWidth;
     }
 
     /**
@@ -196,7 +234,8 @@ class PDF
      */
     public function rect(float $x, float $y, float $width, float $height)
     {
-
+        $this->_last_geometry = array('rect', func_get_args());
+        return true;
     }
 
     /**
@@ -207,7 +246,24 @@ class PDF
      */
     public function fill()
     {
+        if (!is_array($this->_last_geometry) || !$this->_page) {
+            return false;
+        }
 
+        switch($this->_last_geometry[0]) {
+        case 'rect':
+            $this->_page->drawRectangle(
+                $this->_last_geometry[1][0],
+                $this->_last_geometry[1][1],
+                $this->_last_geometry[1][0] + $this->_last_geometry[1][2],
+                $this->_last_geometry[1][1] + $this->_last_geometry[1][3],
+                Zend_Pdf_Page::SHAPE_DRAW_FILL
+            );
+            return true;
+            break;
+        }
+
+        return false;
     }
 
     /**
@@ -221,7 +277,8 @@ class PDF
      */
     public function moveto(float $x, float $y)
     {
-
+        $this->_current_point = func_get_args();
+        return true;
     }
 
     /**
@@ -235,7 +292,12 @@ class PDF
      */
     public function lineto(float $x, float $y)
     {
+        if ($this->_current_point) {
+            $this->_last_geometry = array('line', array($this->_current_point, func_get_args()));
+            return true;
+        }
 
+        return false;
     }
 
     /**
@@ -246,7 +308,33 @@ class PDF
      */
     public function stroke()
     {
+        if (!is_array($this->_last_geometry) || !$this->_page) {
+            return false;
+        }
 
+        switch($this->_last_geometry[0]) {
+        case 'rect':
+            $this->_page->drawRectangle(
+                $this->_last_geometry[1][0],
+                $this->_last_geometry[1][1],
+                $this->_last_geometry[1][0] + $this->_last_geometry[1][2],
+                $this->_last_geometry[1][1] + $this->_last_geometry[1][3],
+                Zend_Pdf_Page::SHAPE_DRAW_STROKE
+            );
+            return true;
+            break;
+        case 'line':
+            $this->_page->drawLine(
+                $this->_last_geometry[1][0][0],
+                $this->_last_geometry[1][0][1],
+                $this->_last_geometry[1][1][0],
+                $this->_last_geometry[1][1][1]
+            );
+            return true;
+            break;
+        }
+
+        return false;
     }
 
     /**
@@ -272,7 +360,23 @@ class PDF
      */
     public function clip()
     {
+        if (!is_array($this->_last_geometry) || !$this->_page) {
+            return false;
+        }
 
+        switch($this->_last_geometry[0]) {
+        case 'rect':
+            $this->_page->clipRectangle(
+                $this->_last_geometry[1][0],
+                $this->_last_geometry[1][1],
+                $this->_last_geometry[1][0] + $this->_last_geometry[1][2],
+                $this->_last_geometry[1][1] + $this->_last_geometry[1][3]
+            );
+            return true;
+            break;
+        }
+
+        return false;
     }
 
     /**
@@ -315,7 +419,7 @@ class PDF
      */
     public function end_page()
     {
-
+        $this->_page = null;
     }
 
     /**
@@ -344,6 +448,27 @@ class PDF
      */
     public function close()
     {
+        $this->_zpdf->save($this->_filename);
+    }
 
+    /**
+     * Add bookmark for current page
+     * 
+     * @param string $text Bookmark title
+     *
+     * @return bool Returns TRUE on success or FALSE on failure.
+     */
+    function add_outline(string $text)
+    {
+        if (!$this->_page) {
+            return false;
+        }
+
+        $this->_zpdf->outlines[] = Zend_Pdf_Outline::create(
+            $text,
+            Zend_Pdf_Destination_Fit::create($this->_page)
+        );
+
+        return true;
     }
 }

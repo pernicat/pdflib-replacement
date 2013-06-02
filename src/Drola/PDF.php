@@ -1,6 +1,14 @@
 <?php
 namespace Drola;
 
+use ZendPdf\PdfDocument as Zend_Pdf;
+use ZendPdf\Font as Zend_Pdf_Font;
+use ZendPdf\Page as Zend_Pdf_Page;
+use ZendPdf\Outline\AbstractOutline as Zend_Pdf_Outline;
+use ZendPdf\Destination\Fit as Zend_Pdf_Destination_Fit;
+use ZendPdf\Resource\Font\AbstractFont as Zend_Pdf_Resource_Font;
+use ZendPdf\Color\GrayScale as Zend_Pdf_Color_GrayScale;
+
 class PDF
 {
     private $_zpdf;
@@ -18,17 +26,21 @@ class PDF
      *
      * @return mixed Returns PDF instance on success or FALSE on failure.
      */
-    public static function open_file(string $filename)
+    public static function open_file($filename)
     {
         return new PDF($filename);
     }
 
-    public function ___construct($filename)
+    public function __construct($filename)
     {
         $this->_filename = $filename;
 
         if (file_exists($filename)) {
-            $this->_zpdf = Zend_Pdf::load($filename);
+            try {
+                $this->_zpdf = Zend_Pdf::load($filename);
+            } catch(\Exception $e) {
+                $this->_zpdf = new Zend_Pdf();
+            }
         } else {
             $this->_zpdf = new Zend_Pdf();
         }
@@ -41,7 +53,7 @@ class PDF
      *
      * @return bool Returns TRUE on success or FALSE on failure.
      */
-    public function set_info_author(string $author)
+    public function set_info_author($author)
     {
         $this->_zpdf->properties['Author'] = $author;
     }
@@ -53,7 +65,7 @@ class PDF
      *
      * @return bool Returns TRUE on success or FALSE on failure.
      */
-    public function set_info_creator(string $creator)
+    public function set_info_creator($creator)
     {
         $this->_zpdf->properties['Creator'] = $creator;
     }
@@ -66,9 +78,21 @@ class PDF
      *
      * @return bool Returns TRUE on success or FALSE on failure.
      */
-    public function set_info_subject(string $subject)
+    public function set_info_subject($subject)
     {
         $this->_zpdf->properties['Subject'] = $subject;
+    }
+
+    /**
+     * Fill the title document info field
+     * 
+     * @param string $title Title
+     *
+     * @return bool Returns TRUE on success or FALSE on failure.
+     */
+    public function set_info_title($title)
+    {
+        $this->_zpdf->properties['Title'] = $title;
     }
 
     /**
@@ -78,7 +102,7 @@ class PDF
      *
      * @return bool Returns TRUE on success or FALSE on failure.
      */
-    public function set_info_keywords(string $keywords)
+    public function set_info_keywords($keywords)
     {
         $this->_zpdf->properties['Keywords'] = $keywords;
     }
@@ -92,7 +116,7 @@ class PDF
      *
      * @return bool Returns TRUE on success or FALSE on failure.
      */
-    public function set_font(string $font, int $size, string $encoding)
+    public function set_font($font, $size, $encoding)
     {
         $fonts = array(
             'courier' => Zend_Pdf_Font::FONT_COURIER,
@@ -128,11 +152,11 @@ class PDF
 
             $this->_font = Zend_Pdf_Font::fontWithName($font);
             if ($this->_page) {
-                $this->_page->setFont($font, $size);
+                $this->_page->setFont($this->_font, $size);
             }
 
             return true;
-        } catch(Exception $e) {
+        } catch(\Exception $e) {
 
         }
 
@@ -149,7 +173,7 @@ class PDF
      *
      * @return bool Returns TRUE on success or FALSE on failure.
      */
-    public function show_xy(string $text, float $x, float $y)
+    public function show_xy($text, $x, $y)
     {
         if (!$this->_page) {
             return false;
@@ -158,7 +182,7 @@ class PDF
         try {
             $this->_page->drawText($text, $x, $y, $this->_encoding);
             return true;
-        } catch(Exception $e) {
+        } catch(\Exception $e) {
         }
 
         return false;
@@ -172,7 +196,7 @@ class PDF
      *
      * @return bool Returns TRUE on success or FALSE on failure.
      */
-    public function setgray_fill(float $gray)
+    public function setgray_fill($gray)
     {
         if (!$this->_page) {
             return false;
@@ -181,7 +205,7 @@ class PDF
         try {
             $this->_page->setFillColor(new Zend_Pdf_Color_GrayScale($gray));
             return true;
-        } catch(Exception $e) {
+        } catch(\Exception $e) {
         }
 
         return false;
@@ -195,7 +219,7 @@ class PDF
      *
      * @return float Width of text
      */
-    public function stringwidth(string $text)
+    public function stringwidth($text)
     {
         //Source: http://stackoverflow.com/a/8076461
         if ($this->_page instanceof Zend_Pdf_Page ) {
@@ -232,7 +256,7 @@ class PDF
      *
      * @return bool Returns TRUE on success or FALSE on failure.
      */
-    public function rect(float $x, float $y, float $width, float $height)
+    public function rect($x, $y, $width, $height)
     {
         $this->_last_geometry = array('rect', func_get_args());
         return true;
@@ -275,7 +299,7 @@ class PDF
      *
      * @return bool Returns TRUE on success or FALSE on failure.
      */
-    public function moveto(float $x, float $y)
+    public function moveto($x, $y)
     {
         $this->_current_point = func_get_args();
         return true;
@@ -290,7 +314,7 @@ class PDF
      *
      * @return bool Returns TRUE on success or FALSE on failure.
      */
-    public function lineto(float $x, float $y)
+    public function lineto($x, $y)
     {
         if ($this->_current_point) {
             $this->_last_geometry = array('line', array($this->_current_point, func_get_args()));
@@ -405,7 +429,7 @@ class PDF
      *
      * @return bool Returns TRUE on success or FALSE on failure.
      */
-    public function begin_page(float $width, float $height)
+    public function begin_page($width, $height)
     {
         $this->_page = $this->_zpdf->newPage($width, $height);
         $this->_zpdf->pages[] = $this->_page;
@@ -431,7 +455,7 @@ class PDF
      *
      * @return bool Returns TRUE on success or FALSE on failure.
      */
-    public function translate(float $tx, float $ty)
+    public function translate($tx, $ty)
     {
         if (!$this->_page) {
             return false;
@@ -458,7 +482,7 @@ class PDF
      *
      * @return bool Returns TRUE on success or FALSE on failure.
      */
-    function add_outline(string $text)
+    function add_outline($text)
     {
         if (!$this->_page) {
             return false;
@@ -469,6 +493,17 @@ class PDF
             Zend_Pdf_Destination_Fit::create($this->_page)
         );
 
+        return true;
+    }
+
+    /**
+     * Determine text rendering
+     * 
+     * @param int $val
+     *
+     * @return bool Returns TRUE on success or FALSE on failure.
+     */
+    public function set_text_rendering($val) {
         return true;
     }
 }

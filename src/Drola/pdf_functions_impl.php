@@ -9,7 +9,7 @@ use Drola\PDF;
  *
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function PDF_open_file(&$pdf, string $filename)
+function PDF_open_file(&$pdf, $filename)
 {
     $pdf = PDF::open_file($filename);
     return $pdf !== false ? true : false;
@@ -23,7 +23,7 @@ function PDF_open_file(&$pdf, string $filename)
  *
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function PDF_set_info_author(PDF $pdf, string $author)
+function PDF_set_info_author(PDF $pdf, $author)
 {
     return $pdf->set_info_author($author);
 }
@@ -36,7 +36,7 @@ function PDF_set_info_author(PDF $pdf, string $author)
  *
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function PDF_set_info_creator(PDF $pdf, string $creator)
+function PDF_set_info_creator(PDF $pdf, $creator)
 {
     return $pdf->set_info_creator($creator);
 }
@@ -50,9 +50,22 @@ function PDF_set_info_creator(PDF $pdf, string $creator)
  *
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function PDF_set_info_subject(PDF $pdf, string $subject)
+function PDF_set_info_subject(PDF $pdf, $subject)
 {
     return $pdf->set_info_subject($subject);
+}
+
+/**
+ * Fill the title document info field
+ * 
+ * @param PDF    $pdf   PDF resource
+ * @param string $title Title
+ *
+ * @return bool Returns TRUE on success or FALSE on failure.
+ */
+function PDF_set_info_title(PDF $pdf, $title)
+{
+    return $pdf->set_info_title($title);
 }
 
 /**
@@ -63,7 +76,7 @@ function PDF_set_info_subject(PDF $pdf, string $subject)
  *
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function PDF_set_info_keywords(PDF $pdf, string $keywords)
+function PDF_set_info_keywords(PDF $pdf, $keywords)
 {
     return $pdf->set_info_keywords($keywords);
 }
@@ -78,7 +91,7 @@ function PDF_set_info_keywords(PDF $pdf, string $keywords)
  *
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function PDF_set_font(PDF $pdf, string $font, int $size, string $encoding)
+function PDF_set_font(PDF $pdf, $font, $size, $encoding)
 {
     return $pdf->set_font($font, $size, $encoding);
 }
@@ -94,7 +107,7 @@ function PDF_set_font(PDF $pdf, string $font, int $size, string $encoding)
  *
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function PDF_show_xy(PDF $pdf, string $text, float $x, float $y)
+function PDF_show_xy(PDF $pdf, $text, $x, $y)
 {
     return $pdf->show_xy($text, $x, $y);
 }
@@ -108,7 +121,7 @@ function PDF_show_xy(PDF $pdf, string $text, float $x, float $y)
  *
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function PDF_setgray_fill(PDF $pdf, float $gray)
+function PDF_setgray_fill(PDF $pdf, $gray)
 {
     return $pdf->setgray_fill($gray);
 }
@@ -122,7 +135,7 @@ function PDF_setgray_fill(PDF $pdf, float $gray)
  *
  * @return float Width of text
  */
-function PDF_stringwidth(PDF $pdf, string $text)
+function PDF_stringwidth(PDF $pdf, $text)
 {
     return $pdf->stringwidth($text);
 }
@@ -139,7 +152,7 @@ function PDF_stringwidth(PDF $pdf, string $text)
  *
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function PDF_rect(PDF $pdf, float $x, float $y, float $width, float $height)
+function PDF_rect(PDF $pdf, $x, $y, $width, $height)
 {
     return $pdf->rect($x, $y, $width, $height);
 }
@@ -167,7 +180,7 @@ function PDF_fill(PDF $pdf)
  *
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function PDF_moveto(PDF $pdf, float $x, float $y)
+function PDF_moveto(PDF $pdf, $x, $y)
 {
     return $pdf->moveto($x, $y);
 }
@@ -182,7 +195,7 @@ function PDF_moveto(PDF $pdf, float $x, float $y)
  *
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function PDF_lineto(PDF $pdf, float $x, float $y)
+function PDF_lineto(PDF $pdf, $x, $y)
 {
     return $pdf->lineto($x, $y);
 }
@@ -249,9 +262,9 @@ function PDF_restore(PDF $pdf)
  *
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function PDF_begin_page(PDF $pdf, float $width, float $height)
+function PDF_begin_page(PDF $pdf, $width, $height)
 {
-    return $pdf->begin_page();
+    return $pdf->begin_page($width, $height);
 }
 
 /**
@@ -277,7 +290,7 @@ function PDF_end_page(PDF $pdf)
  *
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function PDF_translate(PDF $pdf, float $tx, float $ty)
+function PDF_translate(PDF $pdf, $tx, $ty)
 {
     return $pdf->translate();
 }
@@ -303,7 +316,20 @@ function PDF_close(PDF $pdf)
  * 
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function PDF_add_outline(PDF $pdf, string $text)
+function PDF_add_outline(PDF $pdf, $text)
 {
     return $pdf->add_outline($text);
+}
+
+/**
+ * Determine text rendering
+ * 
+ * @param PDF $pdf  PDF resource
+ * @param int $type Type
+ * 
+ * @return bool Returns TRUE on success or FALSE on failure.
+ */
+function PDF_set_text_rendering(PDF $pdf, $type)
+{
+    return $pdf->set_text_rendering($type);
 }

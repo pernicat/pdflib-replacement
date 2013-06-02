@@ -5,6 +5,9 @@ class PDF
 {
     private $_zpdf;
     private $_filename;
+    private $_encoding;
+    private $_font;
+    private $_page;
 
     /**
      * Create PDF file
@@ -89,7 +92,44 @@ class PDF
      */
     public function set_font(string $font, int $size, string $encoding)
     {
+        $fonts = array(
+            'courier' => Zend_Pdf_Font::FONT_COURIER,
+            'courier-bold' => Zend_Pdf_Font::FONT_COURIER_BOLD,
+            'courier-italic' => Zend_Pdf_Font::FONT_COURIER_ITALIC,
+            'courier-bold-italic' => Zend_Pdf_Font::FONT_COURIER_BOLD_ITALIC,
+            'times' => Zend_Pdf_Font::FONT_TIMES,
+            'times-bold' => Zend_Pdf_Font::FONT_TIMES_BOLD,
+            'times-italic' => Zend_Pdf_Font::FONT_TIMES_ITALIC,
+            'times-bold-italic' => Zend_Pdf_Font::FONT_TIMES_BOLD_ITALIC,
+            'times-roman' => Zend_Pdf_Font::FONT_TIMES,
+            'times-roman-bold' => Zend_Pdf_Font::FONT_TIMES_BOLD,
+            'times-roman-italic' => Zend_Pdf_Font::FONT_TIMES_ITALIC,
+            'times-roman-bold-italic' => Zend_Pdf_Font::FONT_TIMES_BOLD_ITALIC,
+            'helvetica' => Zend_Pdf_Font::FONT_HELVETICA,
+            'helvetica-bold' => Zend_Pdf_Font::FONT_HELVETICA_BOLD,
+            'helvetica-italic' => Zend_Pdf_Font::FONT_HELVETICA_ITALIC,
+            'helvetica-bold-italic' => Zend_Pdf_Font::FONT_HELVETICA_BOLD_ITALIC,
+            'symbol' => Zend_Pdf_Font::FONT_SYMBOL,
+            'zapfdingbats' => Zend_Pdf_Font::FONT_ZAPFDINGBATS
+        );
+        
+        try {
+            $font = isset($fonts[strtolower($font)])?$fonts[strtolower($font)]:false;
+            if ($font === false) {
+                return false;
+            }
 
+            $this->_font = Zend_Pdf_Font::fontWithName($font);
+            if ($this->_page) {
+                $this->_page->setFont($font, $size);
+            }
+
+            return true;
+        } catch(Exception $e) {
+
+        }
+
+        return false;
     }
 
     /**
@@ -104,7 +144,17 @@ class PDF
      */
     public function show_xy(string $text, float $x, float $y)
     {
+        if (!$this->_page) {
+            return false;
+        }
 
+        try {
+            $this->_page->drawText($text, $x, $y, $this->_encoding);
+            return true;
+        } catch(Exception $e) {
+        }
+
+        return false;
     }
 
     /**
@@ -206,7 +256,12 @@ class PDF
      */
     public function save()
     {
+        if (!$this->_page) {
+            return false;
+        }
 
+        $this->_page->saveGS();
+        return true;
     }
 
     /**
@@ -228,7 +283,12 @@ class PDF
      */
     public function restore()
     {
+        if (!$this->_page) {
+            return false;
+        }
 
+        $this->_page->restoreGS();
+        return true;
     }
 
     /**
@@ -243,7 +303,8 @@ class PDF
      */
     public function begin_page(float $width, float $height)
     {
-
+        $this->_page = $this->_zpdf->newPage($width, $height);
+        $this->_zpdf->pages[] = $this->_page;
     }
 
     /**
@@ -268,7 +329,11 @@ class PDF
      */
     public function translate(float $tx, float $ty)
     {
+        if (!$this->_page) {
+            return false;
+        }
 
+        $this->_page->translate($tx, $ty);
     }
 
     /**

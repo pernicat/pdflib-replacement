@@ -292,7 +292,7 @@ function PDF_end_page(PDF $pdf)
  */
 function PDF_translate(PDF $pdf, $tx, $ty)
 {
-    return $pdf->translate();
+    return $pdf->translate($tx, $ty);
 }
 
 /**

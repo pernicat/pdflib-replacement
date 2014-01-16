@@ -112,6 +112,11 @@ function PDF_show_xy(PDF $pdf, $text, $x, $y)
     return $pdf->show_xy($text, $x, $y);
 }
 
+function PDF_continue_text(PDF $pdf, $text)
+{
+	return $pdf->continue_text($text);
+}
+	
 /**
  * Set fill color to gray
  * Sets the current fill color to a gray value between 0 and 1 inclusive.

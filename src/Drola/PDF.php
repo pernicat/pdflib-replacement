@@ -18,6 +18,7 @@ class PDF
     private $_page;
     private $_last_geometry;
     private $_current_point;
+    private $_last_y;
 
     /**
      * Create PDF file
@@ -181,11 +182,17 @@ class PDF
 
         try {
             $this->_page->drawText($text, $x, $y, $this->_encoding);
+            $this->_last_y = $y;
             return true;
         } catch(\Exception $e) {
         }
 
         return false;
+    }
+    
+    public function continue_text($text){
+    	$this->_last_y += 20;
+    	self::show_xy($text, 0, $this->_last_y);
     }
 
     /**

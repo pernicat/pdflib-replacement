@@ -8,9 +8,12 @@ use ZendPdf\Outline\AbstractOutline as Zend_Pdf_Outline;
 use ZendPdf\Destination\Fit as Zend_Pdf_Destination_Fit;
 use ZendPdf\Resource\Font\AbstractFont as Zend_Pdf_Resource_Font;
 use ZendPdf\Color\GrayScale as Zend_Pdf_Color_GrayScale;
+use ZendPdf\Resource\Image;
 
 class PDF
 {
+	const LINE_HEIGHT = 20;
+	
     private $_zpdf;
     private $_filename;
     private $_encoding;
@@ -18,7 +21,9 @@ class PDF
     private $_page;
     private $_last_geometry;
     private $_current_point;
-    private $_last_y;
+    private $_x;
+    private $_y;
+    private $_fontSize;
 
     /**
      * Create PDF file
@@ -27,24 +32,27 @@ class PDF
      *
      * @return mixed Returns PDF instance on success or FALSE on failure.
      */
-    public static function open_file($filename)
+    public function open_file($filename)
     {
-        return new PDF($filename);
+    	$this->_filename = $filename;
+    	
+    	if (file_exists($filename)) {
+    		try {
+    			$this->_zpdf = Zend_Pdf::load($filename);
+    		} catch(\Exception $e) {
+    			$this->_zpdf = new Zend_Pdf();
+    		}
+    	} else {
+    		$this->_zpdf = new Zend_Pdf();
+    	}
     }
 
-    public function __construct($filename)
+    public function __construct($filename=null)
     {
-        $this->_filename = $filename;
-
-        if (file_exists($filename)) {
-            try {
-                $this->_zpdf = Zend_Pdf::load($filename);
-            } catch(\Exception $e) {
-                $this->_zpdf = new Zend_Pdf();
-            }
-        } else {
-            $this->_zpdf = new Zend_Pdf();
-        }
+		if($filename!=null){
+			$this->open_file($filename);
+		}
+		return true;
     }
 
     /**
@@ -119,6 +127,8 @@ class PDF
      */
     public function set_font($font, $size, $encoding)
     {
+    	$this->_fontSize = $size;
+    	
         $fonts = array(
             'courier' => Zend_Pdf_Font::FONT_COURIER,
             'courier-bold' => Zend_Pdf_Font::FONT_COURIER_BOLD,
@@ -182,7 +192,8 @@ class PDF
 
         try {
             $this->_page->drawText($text, $x, $y, $this->_encoding);
-            $this->_last_y = $y;
+            $this->_x = $x;
+            $this->_y = $y;
             return true;
         } catch(\Exception $e) {
         }
@@ -191,9 +202,59 @@ class PDF
     }
     
     public function continue_text($text){
-    	$this->_last_y += 20;
-    	self::show_xy($text, 0, $this->_last_y);
+    	$this->_y -= self::LINE_HEIGHT;
+    	return self::show_xy($text, $this->_x, $this->_y);
     }
+    
+    public function show($text){
+    	return self::show_xy($text, $this->_x, $this->_y);
+    }
+    
+    public function set_text_pos($x, $y){
+    	$this->_x = $x;
+    	$this->_y = $y;
+    	return true;
+    }
+    
+    public function load_image($imagetype, $filename, $optlist){
+   	
+    	if(strtolower($imagetype)=='jpg' || strtolower($imagetype)=='jpeg'){
+    		return new Image\Jpeg($filename);
+    	}else if(strtolower($imagetype)=='png'){
+    		return new Image\Png($filename);
+    	}else{
+    		return false;
+    	}
+    	
+    }
+    
+    public function place_image(Image\AbstractImage $image, $x, $y, $scale){
+    	$x1 = $x;
+    	$y1 = $y;
+    	$x2 = $x + $image->getPixelWidth() * $scale;
+    	$y2 = $y + $image->getPixelHeight() * $scale; //$image->getWidth()
+    	return $this->_page->drawImage($image, $x1, $y1, $x2, $y2);
+    }
+    
+    public function findfont($fontname, $encoding, $embed){
+    	return $fontname;
+    }
+    
+    public function show_boxed($text, $left, $top, $width, $height, $mode, $feature){
+    	$lineHeight = $this->_fontSize*1.2;
+    	$charWidth = 4.7;
+    	
+    	
+    	//$this->_page->drawRectangle($left, $top, $left+$width, $top+$height, Zend_Pdf_Page::SHAPE_DRAW_STROKE);
+    	$charsPerLine = $width/$charWidth;
+    	$lines = explode("\n",wordwrap($text, $charsPerLine, "\n"));
+    	$nrOfLines = count($lines);
+    	foreach($lines as $i=>$line){
+    		//$this->_page->drawText($line, $left, $top + $height - ($i+1) * $lineHeight,'UTF-8');
+    		$this->show_xy($line, $left, $top + $height - ($i+1) * $lineHeight);
+    	}
+    }
+    
 
     /**
      * Set fill color to gray
@@ -514,3 +575,4 @@ class PDF
         return true;
     }
 }
+?>

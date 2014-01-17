@@ -9,10 +9,12 @@ use Drola\PDF;
  *
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function PDF_open_file(&$pdf, $filename)
+function PDF_open_file(PDF $pdf, $filename)
 {
-    $pdf = PDF::open_file($filename);
+	return $pdf->open_file($filename);
+    /*$pdf = PDF::open_file($filename);
     return $pdf !== false ? true : false;
+    */
 }
 
 /**
@@ -96,6 +98,11 @@ function PDF_set_font(PDF $pdf, $font, $size, $encoding)
     return $pdf->set_font($font, $size, $encoding);
 }
 
+function PDF_setfont(PDF $pdf, $font, $size, $encoding='UTF-8')
+{
+	return PDF_set_font($pdf, $font, $size, $encoding);
+}
+
 /**
  * Output text at given position
  * Prints text in the current font.
@@ -117,6 +124,46 @@ function PDF_continue_text(PDF $pdf, $text)
 	return $pdf->continue_text($text);
 }
 	
+function PDF_load_image(PDF $pdf, $imagetype, $filename, $optlist){
+	return $pdf->load_image($imagetype, $filename, $optlist);
+}
+
+function PDF_new(){
+	return new PDF();
+}
+
+function PDF_set_text_pos(PDF $pdf, $x, $y){
+	return $pdf->set_text_pos($x, $y);
+}
+
+function PDF_show(PDF $pdf, $text){
+	return $pdf->show($text);
+}
+
+function PDF_findfont(PDF $pdf, $fontname, $encoding, $embed){
+	return $pdf->findfont($fontname, $encoding, $embed);
+}
+
+function PDF_show_boxed(PDF $pdf, $text, $left, $top, $width, $height, $mode, $feature){
+	$pdf->show_boxed($text, $left, $top, $width, $height, $mode, $feature);
+}
+
+function PDF_place_image(PDF $pdf, $image, $x, $y, $scale){
+	return $pdf->place_image($image, $x, $y, $scale);
+}
+
+function PDF_close_image(PDF $pdf, $image){
+	return true;
+}
+
+function PDF_delete(PDF $pdf){
+	return true;
+}
+
+function PDF_closepath_stroke(PDF $pdf){
+	return PDF_stroke($pdf);
+}
+
 /**
  * Set fill color to gray
  * Sets the current fill color to a gray value between 0 and 1 inclusive.
@@ -338,3 +385,4 @@ function PDF_set_text_rendering(PDF $pdf, $type)
 {
     return $pdf->set_text_rendering($type);
 }
+?>

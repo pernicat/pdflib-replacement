@@ -1,5 +1,6 @@
 <?php
 use Drola\PDF;
+use ZendPdf\Resource\Image\AbstractImage;
 
 /**
  * Create PDF file
@@ -98,6 +99,16 @@ function PDF_set_font(PDF $pdf, $font, $size, $encoding)
     return $pdf->set_font($font, $size, $encoding);
 }
 
+/**
+ * Sets the current font in the specified fontsize, 
+ * using a font handle returned by PDF_load_font() 
+ * 
+ * @param PDF $pdf
+ * @param unknown $font
+ * @param unknown $size
+ * @param string $encoding
+ * @return boolean TRUE on success or FALSE on failure.
+ */
 function PDF_setfont(PDF $pdf, $font, $size, $encoding='UTF-8')
 {
 	return PDF_set_font($pdf, $font, $size, $encoding);
@@ -119,49 +130,172 @@ function PDF_show_xy(PDF $pdf, $text, $x, $y)
     return $pdf->show_xy($text, $x, $y);
 }
 
+/**
+ * Prints text at the next line.
+ * 
+ * @param PDF $pdf
+ * @param string $text
+ * @return boolean TRUE on success or FALSE on failure.
+ */
 function PDF_continue_text(PDF $pdf, $text)
 {
 	return $pdf->continue_text($text);
 }
-	
-function PDF_load_image(PDF $pdf, $imagetype, $filename, $optlist){
+
+/**
+ * Opens a disk-based or virtual image file subject to various options.
+ * 
+ * @param PDF $pdf
+ * @param string $imagetype
+ * @param string $filename
+ * @param string $optlist
+ * @return Ambigous <boolean, \ZendPdf\Resource\Image\Jpeg, \ZendPdf\Resource\Image\Png>
+ */
+function PDF_load_image(PDF $pdf, $imagetype, $filename, $optlist)
+{
 	return $pdf->load_image($imagetype, $filename, $optlist);
 }
 
-function PDF_new(){
+/**
+ * Creates a new Drola\PDF object with default settings.
+ * 
+ * @return \Drola\PDF
+ */
+function PDF_new()
+{
 	return new PDF();
 }
 
-function PDF_set_text_pos(PDF $pdf, $x, $y){
+/**
+ * Sets the position for text output on the page.
+ * 
+ * @param PDF $pdf
+ * @param float $x
+ * @param float $y
+ * @return boolean TRUE on success or FALSE on failure.
+ */
+function PDF_set_text_pos(PDF $pdf, $x, $y)
+{
 	return $pdf->set_text_pos($x, $y);
 }
 
-function PDF_show(PDF $pdf, $text){
+/**
+ * Prints text in the current font and size at the current position.
+ * 
+ * @param PDF $pdf
+ * @param string $text
+ * @return boolean TRUE on success or FALSE on failure.
+ */
+function PDF_show(PDF $pdf, $text)
+{
 	return $pdf->show($text);
 }
 
-function PDF_findfont(PDF $pdf, $fontname, $encoding, $embed){
+/**
+ * Search for a font and prepare it for later use with PDF_setfont(). 
+ * The metrics will be loaded, and if <b>embed</b> is nonzero, the font file 
+ * will be checked, but not yet used. <b>encoding</b> is one of builtin, 
+ * <i>macroman</i>, <i>winansi</i>, <i>host</i>, a user-defined encoding 
+ * name or the name of a CMap. 
+ * 
+ * @deprecated This function is deprecated, use PDF_load_font() instead.
+ * @param PDF $pdf
+ * @param string $fontname
+ * @param string $encoding
+ * @param int $embed
+ */
+function PDF_findfont(PDF $pdf, $fontname, $encoding, $embed)
+{
 	return $pdf->findfont($fontname, $encoding, $embed);
 }
 
-function PDF_show_boxed(PDF $pdf, $text, $left, $top, $width, $height, $mode, $feature){
+/**
+ * Output text in a box
+ * 
+ * @deprecated This function is deprecated, use PDF_fit_textline() 
+ * for single lines, or the PDF_*_textflow() functions for multi-line 
+ * formatting instead.
+ * 
+ * @param PDF $pdf
+ * @param string $text
+ * @param float $left
+ * @param float $top
+ * @param float $width
+ * @param float $height
+ * @param string $mode
+ * @param string $feature
+ */
+function PDF_show_boxed(PDF $pdf, $text, $left, $top, $width, $height, $mode, $feature)
+{
 	$pdf->show_boxed($text, $left, $top, $width, $height, $mode, $feature);
 }
 
-function PDF_place_image(PDF $pdf, $image, $x, $y, $scale){
+/**
+ * Places an image and scales it.
+ * 
+ * @deprecated This function is deprecated, use PDF_fit_image() instead.
+ * 
+ * @param PDF $pdf
+ * @param ZendPdf\Resource\Image\AbstractImage $image
+ * @param float $x
+ * @param float $y
+ * @param float $scale
+ * @return boolean TRUE on success or FALSE on failure.
+ */
+function PDF_place_image(PDF $pdf, $image, $x, $y, $scale)
+{
 	return $pdf->place_image($image, $x, $y, $scale);
 }
 
-function PDF_close_image(PDF $pdf, $image){
+/**
+ * Closes an image retrieved with the PDF_open_image() function.
+ * 
+ * This function is only here for compatibility. It has no effect.
+ * 
+ * @param PDF $pdf
+ * @param string $image
+ * @return boolean Always returns TRUE
+ */
+function PDF_close_image(PDF $pdf, $image)
+{
 	return true;
 }
 
-function PDF_delete(PDF $pdf){
+/**
+ * Deletes a PDF object, and frees all internal resources.
+ * 
+ * This function is only here for compatibility. It has no effect.
+ * 
+ * @param PDF $pdf
+ * @return boolean Always returns TRUE
+ */
+function PDF_delete(PDF $pdf)
+{	
 	return true;
 }
 
-function PDF_closepath_stroke(PDF $pdf){
+/**
+ * Closes the path, and strokes it.
+ * 
+ * @param PDF $pdf
+ * @return boolean TRUE on success or FALSE on failure.
+ */
+function PDF_closepath_stroke(PDF $pdf)
+{
 	return PDF_stroke($pdf);
+}
+
+/**
+ * Sets some PDF parameter with string type. 
+ *
+ * @param PDF $pdf
+ * @param scalar $key
+ * @param mixed $value
+ * @return boolean TRUE on success or FALSE on failure.
+ */
+function PDF_set_parameter(PDF $pdf, $key, $value)
+{
+	// TODO
 }
 
 /**
@@ -385,4 +519,3 @@ function PDF_set_text_rendering(PDF $pdf, $type)
 {
     return $pdf->set_text_rendering($type);
 }
-?>

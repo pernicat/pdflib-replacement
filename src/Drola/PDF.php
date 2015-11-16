@@ -201,23 +201,51 @@ class PDF
         return false;
     }
     
+    /**
+	 * Prints text at the next line.
+	 * 
+	 * @param string $text
+	 * @return boolean TRUE on success or FALSE on failure.
+	 */
     public function continue_text($text){
     	$this->_y -= self::LINE_HEIGHT;
     	return self::show_xy($text, $this->_x, $this->_y);
     }
     
+    /**
+     * Prints text in the current font and size at the current position.
+     *
+     * @param string $text
+     * @return boolean TRUE on success or FALSE on failure.
+     */
     public function show($text){
     	return self::show_xy($text, $this->_x, $this->_y);
     }
     
+    /**
+     * Sets the position for text output on the page.
+     *
+     * @param float $x
+     * @param float $y
+     * @return boolean TRUE on success or FALSE on failure.
+     */
     public function set_text_pos($x, $y){
     	$this->_x = $x;
     	$this->_y = $y;
     	return true;
     }
     
-    public function load_image($imagetype, $filename, $optlist){
-   	
+    /**
+	 * Opens a disk-based or virtual image file subject to various options.
+	 * 
+	 * @param string $imagetype
+	 * @param string $filename
+	 * @param string $optlist
+	 * @return \ZendPdf\Resource\Image
+	 */
+    public function load_image($imagetype, $filename, $optlist)
+    {
+   		// TODO use factory instead
     	if(strtolower($imagetype)=='jpg' || strtolower($imagetype)=='jpeg'){
     		return new Image\Jpeg($filename);
     	}else if(strtolower($imagetype)=='png'){
@@ -228,6 +256,17 @@ class PDF
     	
     }
     
+    /**
+     * Places an image and scales it.
+     *
+     * @deprecated This function is deprecated, use PDF_fit_image() instead.
+     *
+     * @param ZendPdf\Resource\Image\AbstractImage $image
+     * @param float $x
+     * @param float $y
+     * @param float $scale
+     * @return boolean TRUE on success or FALSE on failure.
+     */
     public function place_image(Image\AbstractImage $image, $x, $y, $scale){
     	$x1 = $x;
     	$y1 = $y;
@@ -236,10 +275,38 @@ class PDF
     	return $this->_page->drawImage($image, $x1, $y1, $x2, $y2);
     }
     
+    /**
+     * Search for a font and prepare it for later use with PDF_setfont().
+     * The metrics will be loaded, and if <b>embed</b> is nonzero, the font file
+     * will be checked, but not yet used. <b>encoding</b> is one of builtin,
+     * <i>macroman</i>, <i>winansi</i>, <i>host</i>, a user-defined encoding
+     * name or the name of a CMap.
+     *
+     * @deprecated This function is deprecated, use PDF_load_font() instead.
+     * 
+     * @param string $fontname
+     * @param string $encoding
+     * @param int $embed
+     */
     public function findfont($fontname, $encoding, $embed){
     	return $fontname;
     }
     
+    /**
+     * Output text in a box
+     *
+     * @deprecated This function is deprecated, use PDF_fit_textline()
+     * for single lines, or the PDF_*_textflow() functions for multi-line
+     * formatting instead.
+     *
+     * @param string $text
+     * @param float $left
+     * @param float $top
+     * @param float $width
+     * @param float $height
+     * @param string $mode
+     * @param string $feature
+     */
     public function show_boxed($text, $left, $top, $width, $height, $mode, $feature){
     	$lineHeight = $this->_fontSize*1.2;
     	$charWidth = 4.7;
@@ -575,4 +642,3 @@ class PDF
         return true;
     }
 }
-?>

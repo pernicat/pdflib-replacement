@@ -10,70 +10,107 @@ use ZendPdf\Resource\Font\AbstractFont as Zend_Pdf_Resource_Font;
 use ZendPdf\Color\GrayScale as Zend_Pdf_Color_GrayScale;
 use ZendPdf\Resource\Image;
 
+/**
+ * Class PDF
+ * 
+ * Wrapper class for ZendPdf library so it can be used as a drop in replacement 
+ * for PDFlib.
+ * 
+ * @author Matjaž Drolc <mdrolc@gmail.com>
+ * @author murtlest
+ * @author Tony Pernicano <pernicat@gmail.com>
+ */
 class PDF
 {
 	const LINE_HEIGHT = 20;
 	
 	/**
+	 * The Zend_Pdf Object
 	 * 
 	 * @var Zend_Pdf
 	 */
     private $_zpdf;
     
     /**
+     * Filename
      * 
      * @var string
      */
     private $_filename;
     
     /**
+     * Encoding
      * 
      * @var string
      */
     private $_encoding;
     
     /**
+     * Font
      * 
      * @var Zend_Pdf_Resource_Font
      */
     private $_font;
     
     /**
+     * Page
      * 
      * @var Zend_Pdf_Page
      */
     private $_page;
     
     /**
+     * Last Geometry
      * 
      * @var array
      */
     private $_last_geometry;
     
     /**
+     * Current Point
      * 
      * @var array
      */
     private $_current_point;
     
     /**
+     * X coordinate
      * 
      * @var float
      */
     private $_x;
     
     /**
+     * Y coordinate
      * 
      * @var float
      */
     private $_y;
     
     /**
+     * FontSize
      * 
      * @var int
      */
     private $_fontSize;
 
+    
+    /**
+     * Constructor
+     * 
+     * If a filename is specified it opens that file, otherwise it creates a new pdf
+     * 
+     * @param string $filename FileName
+     */
+    public function __construct($filename = null)
+    {
+    	if (null != $filename) {
+    		$this->open_file($filename);
+    	} else {
+    		$this->_zpdf = new Zend_Pdf();
+    	}
+    }
+    
     /**
      * Create PDF file
      * 
@@ -94,14 +131,6 @@ class PDF
     	} else {
     		$this->_zpdf = new Zend_Pdf();
     	}
-    }
-
-    public function __construct($filename=null)
-    {
-		if($filename!=null){
-			$this->open_file($filename);
-		}
-		return true;
     }
 
     /**

@@ -14,15 +14,64 @@ class PDF
 {
 	const LINE_HEIGHT = 20;
 	
+	/**
+	 * 
+	 * @var Zend_Pdf
+	 */
     private $_zpdf;
+    
+    /**
+     * 
+     * @var string
+     */
     private $_filename;
+    
+    /**
+     * 
+     * @var string
+     */
     private $_encoding;
+    
+    /**
+     * 
+     * @var Zend_Pdf_Resource_Font
+     */
     private $_font;
+    
+    /**
+     * 
+     * @var Zend_Pdf_Page
+     */
     private $_page;
+    
+    /**
+     * 
+     * @var array
+     */
     private $_last_geometry;
+    
+    /**
+     * 
+     * @var array
+     */
     private $_current_point;
+    
+    /**
+     * 
+     * @var float
+     */
     private $_x;
+    
+    /**
+     * 
+     * @var float
+     */
     private $_y;
+    
+    /**
+     * 
+     * @var int
+     */
     private $_fontSize;
 
     /**

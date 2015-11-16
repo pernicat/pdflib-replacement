@@ -286,19 +286,6 @@ function PDF_closepath_stroke(PDF $pdf)
 }
 
 /**
- * Sets some PDF parameter with string type. 
- *
- * @param PDF $pdf
- * @param scalar $key
- * @param mixed $value
- * @return boolean TRUE on success or FALSE on failure.
- */
-function PDF_set_parameter(PDF $pdf, $key, $value)
-{
-	// TODO
-}
-
-/**
  * Set fill color to gray
  * Sets the current fill color to a gray value between 0 and 1 inclusive.
  * 

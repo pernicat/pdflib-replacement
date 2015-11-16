@@ -24,6 +24,8 @@ class PDF
 {
 	const LINE_HEIGHT = 20;
 	
+	const PARAM_LICENCE = 'license';
+	
 	/**
 	 * The Zend_Pdf Object
 	 * 
@@ -718,5 +720,26 @@ class PDF
      */
     public function set_text_rendering($val) {
         return true;
+    }
+    
+    /**
+     * Sets some PDFlib parameter with string type.
+     * 
+     * For list of additional parameters:
+     * http://php.net/manual/en/function.pdf-set-parameter.php#9007
+     * 
+     * @param string $key
+     * @param string $value
+     * @return boolean TRUE on success or FALSE on failure.
+     */
+    public function set_parameter($key, $value)
+    {
+    	switch ($key) {
+    		case self::PARAM_LICENCE:
+    			return true;
+    		// TODO add additional parameters
+    		default:
+    			return false;
+    	}
     }
 }

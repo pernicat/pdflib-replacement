@@ -519,3 +519,19 @@ function PDF_set_text_rendering(PDF $pdf, $type)
 {
     return $pdf->set_text_rendering($type);
 }
+
+/**
+ * Sets some PDFlib parameter with string type.
+ *
+ * For list of additional parameters:
+ * http://php.net/manual/en/function.pdf-set-parameter.php#9007
+ *
+ * @param PDF $pdf  PDF resource
+ * @param string $key
+ * @param string $value
+ * @return boolean TRUE on success or FALSE on failure.
+ */
+function PDF_set_parameter(PDF $pdf, $key, $value)
+{
+	return $pdf->set_parameter($key, $value);
+}

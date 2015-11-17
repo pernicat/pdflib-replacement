@@ -106,6 +106,13 @@ class PDF
      * @var int
      */
     private $_fontSize;
+    
+    /**
+     * Error Message
+     * 
+     * @var string
+     */
+    private $_errmsg;
 
     
     /**
@@ -122,6 +129,17 @@ class PDF
     	} else {
     		$this->_zpdf = new Zend_Pdf();
     	}
+    }
+    
+    /**
+     * Gets the text of the last thrown exception 
+     * or the reason for a failed function call.
+     * 
+     * @return string
+     */
+    public function get_errmsg()
+    {
+    	return $this->_errmsg;
     }
     
 	/**
@@ -161,7 +179,8 @@ class PDF
     		try {
     			$this->_zpdf = Zend_Pdf::load($filename);
     		} catch(\Exception $e) {
-    			$this->_zpdf = new Zend_Pdf();
+    			$this->_errmsg = $e->getMessage();
+    			return false;
     		}
     	} else {
     		$this->_zpdf = new Zend_Pdf();
@@ -187,7 +206,7 @@ class PDF
     			self::FILL_STYLE_FILL, 
     			self::FILL_STYLE_BOTH))) 
     	{
-    		// ERROR unknown fill type
+    		$this->_errmsg = "Unknown fill type '$fstype'";
     		return false;
     	}
     	
@@ -196,7 +215,7 @@ class PDF
     	} elseif (self::COLOR_SPACE_CMYK) {
     		$color = new Zend_Pdf_Color_Cymk($c1, $c2, $c3, $c4);
     	} else {
-    		// ERROR unknown color space
+    		$this->_errmsg = "Unknown color space '$colorspace'";
     		return false;
     	}
 
@@ -219,6 +238,8 @@ class PDF
     {
     	return $this->_zpdf->render();
     }
+    
+    
     
     /**
      * Fill the author document info field
@@ -323,6 +344,7 @@ class PDF
         try {
             $font = isset($fonts[strtolower($font)])?$fonts[strtolower($font)]:false;
             if ($font === false) {
+            	$this->_errmsg = "could not find font '$font'";
                 return false;
             }
 
@@ -333,7 +355,7 @@ class PDF
 
             return true;
         } catch(\Exception $e) {
-
+        	$this->_errmsg = $e->getMessage();
         }
 
         return false;
@@ -352,6 +374,7 @@ class PDF
     public function show_xy($text, $x, $y)
     {
         if (!$this->_page) {
+        	$this->_errmsg = 'No Page';
             return false;
         }
 
@@ -361,6 +384,7 @@ class PDF
             $this->_y = $y;
             return true;
         } catch(\Exception $e) {
+        	$this->_errmsg = $e->getMessage();
         }
 
         return false;
@@ -416,9 +440,9 @@ class PDF
     	}else if(strtolower($imagetype)=='png'){
     		return new Image\Png($filename);
     	}else{
+    		$this->_errmsg = "unknown image type '$imagetype'";
     		return false;
     	}
-    	
     }
     
     /**
@@ -499,6 +523,7 @@ class PDF
     public function setgray_fill($gray)
     {
         if (!$this->_page) {
+        	$this->_errmsg = 'No Page';
             return false;
         }
 
@@ -506,6 +531,7 @@ class PDF
             $this->_page->setFillColor(new Zend_Pdf_Color_GrayScale($gray));
             return true;
         } catch(\Exception $e) {
+        	$this->_errmsg = $e->getMessage();
         }
 
         return false;
@@ -531,6 +557,7 @@ class PDF
         }
 
         if (!$font instanceof Zend_Pdf_Resource_Font ) {
+        	$this->_errmsg = "Could not find font";
             return false;
         }
         $drawingText = $text;//iconv ( '', $encoding, $text );
@@ -570,11 +597,19 @@ class PDF
      */
     public function fill()
     {
-        if (!is_array($this->_last_geometry) || !$this->_page) {
+        if (!is_array($this->_last_geometry)) {
+        	$this->_errmsg = "No Geometry";
             return false;
         }
+        
+        if (!$this->_page) {
+        	$this->_errmsg = "No Page";
+        	return false;
+        }
 
-        switch($this->_last_geometry[0]) {
+        $shape = $this->_last_geometry[0];
+        
+        switch($shape) {
         case 'rect':
             $this->_page->drawRectangle(
                 $this->_last_geometry[1][0],
@@ -587,6 +622,7 @@ class PDF
             break;
         }
 
+        $this->_errmsg = "Unknown shape '$shape'";
         return false;
     }
 
@@ -621,6 +657,7 @@ class PDF
             return true;
         }
 
+        $this->_errmsg = "Current Point not set";
         return false;
     }
 
@@ -632,11 +669,19 @@ class PDF
      */
     public function stroke()
     {
-        if (!is_array($this->_last_geometry) || !$this->_page) {
+    	if (!is_array($this->_last_geometry)) {
+        	$this->_errmsg = "No Geometry";
             return false;
         }
+        
+        if (!$this->_page) {
+        	$this->_errmsg = "No Page";
+        	return false;
+        }
 
-        switch($this->_last_geometry[0]) {
+        $shape = $this->_last_geometry[0];
+        
+        switch($shape) {
         case 'rect':
             $this->_page->drawRectangle(
                 $this->_last_geometry[1][0],
@@ -658,6 +703,7 @@ class PDF
             break;
         }
 
+        $this->_errmsg = "Unknown shape '$shape'";
         return false;
     }
 
@@ -668,8 +714,9 @@ class PDF
      */
     public function save()
     {
-        if (!$this->_page) {
-            return false;
+    	if (!$this->_page) {
+        	$this->_errmsg = "No Page";
+        	return false;
         }
 
         $this->_page->saveGS();
@@ -684,11 +731,19 @@ class PDF
      */
     public function clip()
     {
-        if (!is_array($this->_last_geometry) || !$this->_page) {
+    	if (!is_array($this->_last_geometry)) {
+        	$this->_errmsg = "No Geometry";
             return false;
         }
-
-        switch($this->_last_geometry[0]) {
+        
+        if (!$this->_page) {
+        	$this->_errmsg = "No Page";
+        	return false;
+        }
+        
+        $shape = $this->_last_geometry[0];
+        
+        switch($shape) {
         case 'rect':
             $this->_page->clipRectangle(
                 $this->_last_geometry[1][0],
@@ -700,6 +755,7 @@ class PDF
             break;
         }
 
+        $this->_errmsg = "Unknown shape '$shape'";
         return false;
     }
 
@@ -711,8 +767,9 @@ class PDF
      */
     public function restore()
     {
-        if (!$this->_page) {
-            return false;
+    	if (!$this->_page) {
+        	$this->_errmsg = "No Page";
+        	return false;
         }
 
         $this->_page->restoreGS();
@@ -757,8 +814,9 @@ class PDF
      */
     public function translate($tx, $ty)
     {
-        if (!$this->_page) {
-            return false;
+    	if (!$this->_page) {
+        	$this->_errmsg = "No Page";
+        	return false;
         }
 
         $this->_page->translate($tx, $ty);
@@ -787,8 +845,9 @@ class PDF
      */
     function add_outline($text)
     {
-        if (!$this->_page) {
-            return false;
+    	if (!$this->_page) {
+        	$this->_errmsg = "No Page";
+        	return false;
         }
 
         $this->_zpdf->outlines[] = Zend_Pdf_Outline::create(
@@ -826,8 +885,8 @@ class PDF
     		case self::PARAM_LICENCE:
     			return true;
     		// TODO add additional parameters
-    		default:
-    			return false;
     	}
+    	$this->_errmsg = "Unknown parameter '$key'";
+    	return false;
     }
 }

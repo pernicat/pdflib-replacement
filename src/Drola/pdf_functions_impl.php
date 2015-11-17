@@ -65,6 +65,18 @@ function PDF_get_buffer(PDF $pdf)
 }
 
 /**
+ * Gets the text of the last thrown exception 
+ * or the reason for a failed function call.
+ * 
+ * @param PDF $pdf
+ * @return string
+ */
+function PDF_get_errmsg(PDF $pdf)
+{
+	return $pdf->get_errmsg();
+}
+
+/**
  * Fill the author document info field
  * 
  * @param PDF    $pdf    PDF resource

@@ -113,6 +113,28 @@ class PDF
     	}
     }
     
+	/**
+	 * Opens an image file.
+	 * 
+	 * @deprecated This function is deprecated, use load_image() 
+	 * with the colorize, ignoremask, invert, mask, masked, and page 
+	 * options instead.
+	 * 
+	 * @param string $imagetype
+	 * @param string $filename
+	 * @param string $stringparam
+	 * @param integer $intparam
+	 * @return AbstractImage
+	 */
+	public function open_image_file( 
+			$imagetype, 
+			$filename, 
+			$stringparam = '', 
+			$intparam = 0) 
+	{
+		return ImageFactory::factory($filename);
+	}
+    
     /**
      * Create PDF file
      * 

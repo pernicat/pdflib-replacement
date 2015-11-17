@@ -1,5 +1,6 @@
 <?php
 use Drola\PDF;
+use ZendPdf\Resource\Image\ImageFactory;
 use ZendPdf\Resource\Image\AbstractImage;
 
 /**
@@ -13,6 +14,26 @@ use ZendPdf\Resource\Image\AbstractImage;
 function PDF_open_file(PDF $pdf, $filename)
 {
 	return $pdf->open_file($filename);
+}
+
+/**
+ * gets an image resource
+ * 
+ * @param PDF $pdf
+ * @param string $imagetype
+ * @param string $filename
+ * @param string $stringparam
+ * @param integer $intparam
+ * @return AbstractImage
+ */
+function PDF_open_image_file(
+		PDF $pdf, 
+		$imagetype, 
+		$filename, 
+		$stringparam = null, 
+		$intparam = 0) 
+{
+	return ImageFactory::factory($filename);
 }
 
 /**

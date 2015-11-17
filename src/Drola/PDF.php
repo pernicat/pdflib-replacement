@@ -762,7 +762,10 @@ class PDF
      */
     public function close()
     {
-        $this->_zpdf->save($this->_filename);
+    	if ($this->_filename) {
+        	$this->_zpdf->save($this->_filename);
+    	}
+        return true;
     }
 
     /**

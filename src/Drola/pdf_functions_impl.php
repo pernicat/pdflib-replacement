@@ -54,6 +54,17 @@ function PDF_setcolor(PDF $pdf, $fstype, $colorspace, $c1, $c2, $c3, $c4 = 0)
 }
 
 /**
+ * Fetches the buffer containing the generated PDF data.
+ * 
+ * @param PDF $pdf
+ * @return string
+ */
+function PDF_get_buffer(PDF $pdf)
+{
+	return $pdf->get_buffer();
+}
+
+/**
  * Fill the author document info field
  * 
  * @param PDF    $pdf    PDF resource

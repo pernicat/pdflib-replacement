@@ -211,6 +211,16 @@ class PDF
     }
     
     /**
+     * Fetches the buffer containing the generated PDF data.
+     * 
+     * @return string
+     */
+    public function get_buffer()
+    {
+    	return $this->_zpdf->render();
+    }
+    
+    /**
      * Fill the author document info field
      * 
      * @param string $author Author

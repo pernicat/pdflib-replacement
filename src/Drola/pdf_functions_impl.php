@@ -37,6 +37,23 @@ function PDF_open_image_file(
 }
 
 /**
+ * Sets the current color space and color
+ *
+ * @param PDF $pdf PDF resource
+ * @param string $fstype 'fill', 'stroke', or 'both'
+ * @param string $colorspace 'rgb' or 'cymk'
+ * @param float $c1 red or cyan value
+ * @param float $c2 green or yellow value
+ * @param float $c3 blue or magenta value
+ * @param float $c4 key value ('cymk' only)
+ * @return boolean TRUE on success or FALSE on failure.
+ */
+function PDF_setcolor(PDF $pdf, $fstype, $colorspace, $c1, $c2, $c3, $c4 = 0)
+{
+	return $pdf->setcolor($fstype, $colorspace, $c1, $c2, $c3, $c4);
+}
+
+/**
  * Fill the author document info field
  * 
  * @param PDF    $pdf    PDF resource

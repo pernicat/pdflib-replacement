@@ -8,7 +8,11 @@ use ZendPdf\Outline\AbstractOutline as Zend_Pdf_Outline;
 use ZendPdf\Destination\Fit as Zend_Pdf_Destination_Fit;
 use ZendPdf\Resource\Font\AbstractFont as Zend_Pdf_Resource_Font;
 use ZendPdf\Color\GrayScale as Zend_Pdf_Color_GrayScale;
+use ZendPdf\Color\Cmyk as Zend_Pdf_Color_Cmyk;
+use ZendPdf\Color\Rgb as Zend_Pdf_Color_Rgb;
 use ZendPdf\Resource\Image;
+
+
 
 /**
  * Class PDF
@@ -25,6 +29,13 @@ class PDF
 	const LINE_HEIGHT = 20;
 	
 	const PARAM_LICENCE = 'license';
+	
+	const FILL_STYLE_FILL   = 'fill';
+	const FILL_STYLE_STROCK = 'stroke';
+	const FILL_STYLE_BOTH   = 'both';
+	
+	const COLOR_SPACE_RGB = 'rgb';
+	const COLOR_SPACE_CMYK = 'cmyk';
 	
 	/**
 	 * The Zend_Pdf Object
@@ -158,6 +169,47 @@ class PDF
     	return true;
     }
 
+    /**
+     * Sets the current color space and color
+     * 
+     * @param string $fstype 'fill', 'stroke', or 'both'
+     * @param string $colorspace 'rgb' or 'cymk'
+     * @param float $c1 red or cyan value
+     * @param float $c2 green or yellow value
+     * @param float $c3 blue or magenta value
+     * @param float $c4 key value ('cymk' only)
+     * @return boolean TRUE on success or FALSE on failure.
+     */
+    public function setcolor($fstype, $colorspace, $c1, $c2, $c3, $c4 = 0)
+    {
+    	if (in_array($fstype, array(
+    			self::FILL_STYLE_STROCK,
+    			self::FILL_STYLE_FILL, 
+    			self::FILL_STYLE_BOTH))) 
+    	{
+    		// ERROR unknown fill type
+    		return false;
+    	}
+    	
+    	if (self::COLOR_SPACE_RGB) {
+    		$color = new Zend_Pdf_Color_Rgb($c1, $c2, $c3);
+    	} elseif (self::COLOR_SPACE_CMYK) {
+    		$color = new Zend_Pdf_Color_Cymk($c1, $c2, $c3, $c4);
+    	} else {
+    		// ERROR unknown color space
+    		return false;
+    	}
+
+    	if (in_array($fstype, array(self::FILL_STYLE_FILL, self::FILL_STYLE_BOTH))) {
+    		$this->_page->setFillColor($color);
+    	}
+    	
+    	if (in_array($fstype, array(self::FILL_STYLE_FILL, self::FILL_STYLE_STROCK))) {
+    		$this->_page->setLineColor($color);
+    	}
+    	return true;
+    }
+    
     /**
      * Fill the author document info field
      * 

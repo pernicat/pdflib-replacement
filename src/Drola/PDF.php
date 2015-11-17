@@ -133,6 +133,7 @@ class PDF
     	} else {
     		$this->_zpdf = new Zend_Pdf();
     	}
+    	return true;
     }
 
     /**

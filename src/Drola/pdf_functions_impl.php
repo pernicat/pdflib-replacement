@@ -13,9 +13,6 @@ use ZendPdf\Resource\Image\AbstractImage;
 function PDF_open_file(PDF $pdf, $filename)
 {
 	return $pdf->open_file($filename);
-    /*$pdf = PDF::open_file($filename);
-    return $pdf !== false ? true : false;
-    */
 }
 
 /**

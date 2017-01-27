@@ -161,7 +161,10 @@ class PDF
 			$stringparam = '', 
 			$intparam = 0) 
 	{
-		return ImageFactory::factory($filename);
+		// TODO set $optlist based on params
+		$optlist = '';
+		
+		return $this->load_image($imagetype, $filename, $optlist);
 	}
     
     /**
@@ -435,11 +438,11 @@ class PDF
     public function load_image($imagetype, $filename, $optlist)
     {
    		// TODO use factory instead
-    	if(strtolower($imagetype)=='jpg' || strtolower($imagetype)=='jpeg'){
+    	if (strtolower($imagetype)=='jpg' || strtolower($imagetype)=='jpeg') {
     		return new Image\Jpeg($filename);
-    	}else if(strtolower($imagetype)=='png'){
+    	} else if (strtolower($imagetype)=='png') {
     		return new Image\Png($filename);
-    	}else{
+    	} else {
     		$this->_errmsg = "unknown image type '$imagetype'";
     		return false;
     	}

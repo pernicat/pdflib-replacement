@@ -19,6 +19,10 @@ function PDF_open_file(PDF $pdf, $filename)
 /**
  * gets an image resource
  * 
+ * @deprecated This function is deprecated, use PDF_load_image() 
+ * with the colorize, ignoremask, invert, mask, masked, and page 
+ * options instead.
+ * 
  * @param PDF $pdf
  * @param string $imagetype
  * @param string $filename
@@ -33,7 +37,7 @@ function PDF_open_image_file(
 		$stringparam = null, 
 		$intparam = 0) 
 {
-	return ImageFactory::factory($filename);
+	return $pdf->open_image_file($imagetype, $filename);
 }
 
 /**
